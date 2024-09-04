@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="tax_invoice_report_view" model="ir.ui.view">
+            <field name="name">account.move</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="project_name"/>
+                    <field name="location"/>
+                    <field name="contract_ref"/>
+                    <field name="customer_lpo"/>
+                </field>
+
+
+            </field>
+        </record>
+
+        <record id="view_company_form_inherit" model="ir.ui.view">
+            <field name="name">res.company.form.inherit</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <field name="currency_id" position="after">
+                    <group>
+                        <field name="bank_name"/>
+                        <field name="account_no"/>
+                        <field name="iban_number"/>
+                        <field name="ben_no"/>
+                    </group>
+                </field>
+            </field>
+        </record>
+
+
+    </data>
+
+</odoo>
