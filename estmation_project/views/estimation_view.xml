@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_order_form_new" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <div class="oe_button_box" name="button_box" position="inside">
+                    <button name="action_view_estimate"
+                            type="object"
+                            class="oe_stat_button"
+                            string="Estimation"
+                            icon="fa-pencil-square-o">
+                    </button>
+                </div>
+            </field>
+        </record>
+
+        <record id="purchase_order_form1" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <div class="oe_button_box" name="button_box" position="inside">
+                    <button name="action_view_estimate"
+                            type="object"
+                            class="oe_stat_button"
+                            string="Estimation"
+                            icon="fa-pencil-square-o">
+                    </button>
+                </div>
+                <field name='price_unit' position="replace">
+                    <field name="price_unit" required="False"/>
+                </field>
+
+                <page name="purchase_delivery_invoice" position="inside">
+                    <label for="job_cost_id"/>
+                    <field name="job_cost_id" string="Estimation"/>
+                </page>
+            </field>
+        </record>
+
+        <record id="action_rfq_new" model="ir.actions.act_window">
+            <field name="name">RFQ</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">form,tree,graph</field>
+            <field name="domain">[('job_cost_id', '=', active_id)]</field>
+            <field name="context">{'search_default_job_cost_id': active_id, 'default_job_cost_id': active_id}</field>
+        </record>
+
+
+        <record model="ir.ui.view" id="job_costing_form_view">
+            <field name="name">Job.Costing.Form</field>
+            <field name="model">job.costing</field>
+            <field name="arch" type="xml">
+                <form string='Job Costing form'>
+                    <header>
+                        <button string="Create RFQ" name="action_rfq_new" type="object" class="oe_highlight"/>
+                        <button string="Submit" name="action_submit" invisible="state != 'draft'" type="object"
+                                groups="base.group_user"/>
+                        <button string="Approve Level1" name="action_confirm" invisible="state != 'submit_r1'"
+                                type="object"
+                                groups="estmation_project.group_estimation_r1,estmation_project.group_estimation_r2"/>
+                        <button string="Approve Level2" name="action_done" invisible="state != 'submit_r2'"
+                                type="object" groups="estmation_project.group_estimation_r2"/>
+                        <button string="Cancel" name="action_cancel" invisible="state not in ['submit_r1','submit_r2']"
+                                type="object"
+                                groups="base.group_user,estmation_project.group_estimation_r1,estmation_project.group_estimation_r2"/>
+                        <button string="Set to Draft" name="action_draft" invisible="state != 'cancel'" type="object"
+                                groups="base.group_user"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,submit_r1,submit_r2,approve"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_sale_order"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    string="Quotations"
+                                    icon="fa-pencil-square-o">
+                            </button>
+                            <button name="action_view_purchase"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-pencil-square-o"
+                                    string="Purchases"
+                            >
+                            </button>
+                            <button name="action_view_crm"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-pencil-square-o"
+                                    string="CRM"
+                            >
+                            </button>
+                            <!--<button name="action_view_vendor_bill_line"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-bars">
+                                <field string="Vendor Invoice Lines" name="account_invoice_line_count" widget="statinfo"/>
+                            </button> -->
+                        </div>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="number"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <!-- <field name="project_id"/> -->
+                                <field name="analytic_id"/>
+                                <!--  <field name="task_id"/> -->
+                                <!--                          odoo11  <field name="issue_id" attrs="{'readonly' : [('state','in',('approve','done','cancel'))]}"/>-->
+                                <field name="partner_id"/>
+                                <field name="description"/>
+                                <field name="so_number"/>
+                            </group>
+                            <group>
+                                <field name="start_date"/>
+                                <field name="complete_date"/>
+                                <field name="user_id"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="currency_id" groups="base.group_multi_currency"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Materials" name="job_cost_material_page">
+                                <field name="job_cost_line_ids" nolabel="1"
+                                       context="{'default_analytic_id':analytic_id,'default_job_type':'material'}">
+                                    <tree editable="bottom">
+                                        <field name="sl_num"/>
+                                        <field name="job_type" column_invisible="1"/>
+                                        <!-- <field name="job_type_id" domain="[('job_type','=',job_type)]"/> -->
+                                        <field name="product_id"/>
+                                        <field name="description"/>
+                                        <field name="reference"/>
+                                        <field name="product_qty" sum="Total"/>
+                                        <field name="uom_id"/>
+                                        <field name="cost_price" sum="Total"/>
+                                        <field name="margin" sum="Total"/>
+
+                                        <!--  <field name="actual_quantity" sum="Total"/>
+                                         <field name="actual_invoice_quantity" sum="Total"/> -->
+                                        <field name="total_cost" widget="monetary" sum="Total"/>
+                                        <field name="margin_total" sum="Total"/>
+                                        <field name="currency_id" column_invisible="1"/>
+                                        <field name="direct_id" column_invisible="1"/>
+                                    </tree>
+                                </field>
+                                <group col="4">
+                                    <field name="calculation_method_material"/>
+                                    <field name="perc_material"
+                                           invisible="calculation_method_material != 'percentage'"/>
+                                    <field name="lumsum_material"
+                                           invisible="calculation_method_material !='lumsum'"/>
+                                </group>
+                            </page>
+                            <page string="Resources" name="job_cost_labour_page">
+                                <field name="job_labour_line_ids" nolabel="1"
+                                       context="{'default_analytic_id':analytic_id,'default_job_type':'labour'}">
+                                    <tree editable="bottom">
+                                        <field name="sl_num"/>
+                                        <field name="job_type" column_invisible="1"/>
+                                        <!-- <field name="job_type_id" domain="[('job_type','=',job_type)]"/> -->
+                                        <field name="product_id"/>
+                                        <field name="description"/>
+                                        <field name="reference"/>
+                                        <field name="hours" widget="float_time" sum="Total"/>
+                                        <field name="cost_price" sum="Total"/>
+                                        <field name="margin" sum="Total"/>
+                                        <!-- <field name="actual_hour" widget="float_time" sum="Total"/> -->
+                                        <field name="total_cost" widget="monetary" sum="Total"/>
+                                        <field name="margin_total" sum="Total"/>
+                                        <field name="currency_id" column_invisible="1"/>
+                                        <field name="direct_id" column_invisible="1"/>
+                                    </tree>
+                                </field>
+                                <group colspan="4" col="4">
+                                    <field name="calculation_method_labour"/>
+                                    <field name="perc_labour" invisible="calculation_method_overhead != 'percentage'"/>
+                                    <field name="lumsum_labour" invisible="calculation_method_overhead != 'lumsum'"/>
+                                </group>
+                            </page>
+                            <page string="Overhead" name="job_cost_overhead_page">
+                                <field name="job_overhead_line_ids" nolabel="1"
+                                       context="{'default_analytic_id':analytic_id,'default_job_type':'overhead'}">
+                                    <tree editable="bottom">
+                                        <field name="sl_num"/>
+                                        <field name="job_type" column_invisible="1"/>
+                                        <!--  <field name="job_type_id" domain="[('job_type','=',job_type)]"/> -->
+                                        <field name="product_id"/>
+                                        <field name="description"/>
+                                        <field name="reference"/>
+                                        <field name="basis"/>
+                                        <field name="product_qty" sum="Total"/>
+                                        <field name="uom_id"/>
+                                        <field name="cost_price" sum="Total"/>
+                                        <field name="margin" sum="Total"/>
+                                        <field name="total_cost" widget="monetary" sum="Total"/>
+                                        <field name="margin_total" sum="Total"/>
+                                        <field name="currency_id" column_invisible="1"/>
+                                        <field name="direct_id" column_invisible="1"/>
+                                    </tree>
+                                </field>
+                                <group colspan="4" col="4">
+                                    <field name="calculation_method_overhead"/>
+                                    <field name="perc_overhead"
+                                           invisible="calculation_method_overhead != 'percentage'"/>
+                                    <field name="lumsum_overhead" invisible="calculation_method_overhead != 'lumsum'"/>
+                                </group>
+                            </page>
+                        </notebook>
+
+                        <group>
+                            <table width="900">
+                                <tr>
+                                    <td width="48%">
+                                        <label for="notes_job"/>
+                                        <field name="notes_job" class="oe_inline" nolabel="1"
+                                               placeholder="Setup default Job Details or Technical contents."/>
+                                    </td>
+                                    <td width="50%">
+                                        <table class="oe_subtotal_footer oe_right" style="float:right">
+                                            <tr>
+                                                <th style='width:21%; font-weight:bold'></th>
+                                                <th width="15%" style='font-weight:bold;text-align: right;'>Total
+                                                    Without Margin
+                                                </th>
+                                                <th width="13%" style='font-weight:bold;text-align: right;'>Total With
+                                                    Margin
+                                                </th>
+                                                <th width="15%" style='font-weight:bold;text-align: right;'>Total
+                                                    Margin
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <td style='width:21%; font-weight:bold'>
+                                                    <b>
+                                                        <label style='font-weight:bold' for="material_total"/>
+                                                    </b>
+                                                </td>
+                                                <td style='width:15%; text-align: right;padding-right"5px;'
+                                                    alin="right">
+                                                    <field name="material_total" widget="monetary"/>
+                                                </td>
+                                                <td style='width:13%; text-align: right;'>
+                                                    <field name="jobcost_total_material" widget="monetary"/>
+                                                </td>
+                                                <td style='width:15%; text-align: right;'>
+                                                    <field name="total_m" widget="monetary"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style='width:21%; font-weight:bold'>
+                                                    <label style='font-weight:bold' for="labor_total"/>
+                                                </td>
+                                                <td style='width:15%; text-align: right;'>
+                                                    <field name="labor_total" widget="monetary"/>
+                                                </td>
+                                                <td style='width:13%; text-align: right;'>
+                                                    <field name="jobcost_total_labour" widget="monetary"/>
+                                                </td>
+                                                <td style='width:15%; text-align: right;'>
+                                                    <field name="total_l" widget="monetary"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style='width:21%; font-weight:bold'>
+                                                    <label style='font-weight:bold' for="overhead_total"/>
+                                                </td>
+                                                <td style='width:15%; text-align: right;'>
+                                                    <field name="overhead_total" widget="monetary"/>
+                                                </td>
+                                                <td style='width:13%; text-align: right;'>
+                                                    <field name="jobcost_total_overhead" widget="monetary"/>
+                                                </td>
+                                                <td style='width:15%; text-align: right;'>
+                                                    <field name="total_o" widget="monetary"/>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th style='width:21%; font-weight:bold'>
+                                                    <label style='font-weight:bold' for="jobcost_total"/>
+                                                </th>
+                                                <th style='width:15%; font-weight:bold;text-align: right;'>
+                                                    <field name="jobcost_total" widget="monetary"/>
+                                                </th>
+                                                <th style='width:13%; font-weight:bold;text-align: right;'>
+                                                    <field name="total" widget="monetary"/>
+                                                </th>
+                                                <th style='width:15%; font-weight:bold;text-align: right;'>
+                                                    <field name="mtotal" widget="monetary"/>
+                                                </th>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                            <!-- <group class="oe_subtotal_footer oe_right" colspan="4" name="jobcost_total">
+                                   <field name="material_total" widget="monetary"/>
+                                   <field name="labor_total" widget="monetary"/>
+                                   <field name="overhead_total" widget="monetary"/>
+                                   <field name="jobcost_total" widget="monetary"/>
+                            </group> -->
+
+                            <div class="oe_clear"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="job_costing_tree_view" model="ir.ui.view">
+            <field name="name">Job.Costing.List</field>
+            <field name="model">job.costing</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="number"/>
+                    <field name="name"/>
+                    <field name="start_date"/>
+                    <field name="complete_date"/>
+                    <field name="jobcost_total" widget="monetary"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="job_costing_search" model="ir.ui.view">
+            <field name="name">job_costing_search</field>
+            <field name="model">job.costing</field>
+            <field name="arch" type="xml">
+                <search string="Search Job Coasting">
+                    <field name="number"/>
+                    <field name="name"/>
+                    <field name="start_date"/>
+                    <field name="complete_date"/>
+                    <field name="partner_id"/>
+                    <field name="company_id"/>
+                    <field name="user_id"/>
+                    <!-- <filter string="Confirm Job Costing" domain="[('state','=','confirm')]"/>
+                     <filter string="Approved Job Costing" domain="[('state','=','approve')]"/>
+                     <filter string="Done Job Costing" domain="[('state','=','done')]"/>
+                     <filter string="Cancel Job Costing" domain="[('state','=','cancel')]"/>
+                     <group expand="0" string="Group By">
+                         <filter string="User" context="{'group_by':'user_id'}"/>
+                         <filter string="Customer" context="{'group_by':'partner_id'}"/>
+                         <filter string="Project" context="{'group_by':'project_id'}"/>
+                         <filter string="Start Date" context="{'group_by':'start_date'}"/>
+                         <filter string="Company" context="{'group_by':'company_id'}"/>
+                     </group>-->
+                    <group expand="0" string="Group By">
+                        <filter string="User" name="user_id" context="{'group_by':'user_id'}"/>
+                        <filter string="Customer" name="customer" context="{'group_by':'partner_id'}"/>
+                        <filter string="Start Date" name="start_date" context="{'group_by':'start_date'}"/>
+                        <filter string="Company" name="company" context="{'group_by':'company_id'}"/>
+                        <filter string="Submitted Estimations for R1 Approval" name="r1"
+                                domain="[('state','=','submit_r1')]"/>
+                        <filter string="Submitted Estimations for R2 Approval" name="r2"
+                                domain="[('state','=','submit_r2')]"/>
+                        <filter string="Approved Estimations" name="approve" domain="[('state','=','approve')]"/>
+                        <filter string="Cancelled Estimations" name="cancel" domain="[('state','=','cancel')]"/>
+                        <filter string="Draft Estimations" name="draft" domain="[('state','=','draft')]"/>
+
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="job_cost_line_tree_view" model="ir.ui.view">
+            <field name="name">Job.Cost.line.Form</field>
+            <field name="model">job.cost.line</field>
+            <field name="arch" type="xml">
+                <tree editable="bottom">
+                    <!--  <field name="date"/> -->
+                    <field name="job_type"/>
+                    <field name="product_id"/>
+                    <field name="description"/>
+                    <field name="reference"/>
+                    <!--  <field name="job_type_id" domain="[('job_type','=',job_type)]"/> -->
+                    <field name="basis" column_invisible="job_type != 'overhead'"/>
+                    <field name="product_qty" column_invisible="job_type != 'labour'"/>
+                    <field name="uom_id" column_invisible="job_type != 'labour'"/>
+                    <!-- <field name="actual_quantity"/> -->
+                    <field name="hours" column_invisible="job_type != 'labour'"/>
+                    <!--  <field name="actual_hour"/> -->
+                    <field name="cost_price"/>
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="total_cost" widget="monetary"/>
+                    <field name="direct_id" column_invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_job_costing">
+            <field name="name">Job Cost Sheets</field>
+            <field name="res_model">job.costing</field>
+            <!--            <field name="view_type">form</field>-->
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+        <menuitem id="menu_estimation_all"
+                  name="Estimation"
+                  action="action_job_costing"
+                  parent="sale.sale_order_menu"
+                  sequence="12"/>
+
+    </data>
+</odoo>

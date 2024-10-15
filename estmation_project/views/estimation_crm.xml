@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_estimation_new1" model="ir.actions.act_window">
+        <field name="name">Estimation</field>
+        <field name="res_model">job.costing</field>
+        <field name="view_mode">form,tree,graph</field>
+        <field name="domain">[('lead_id', '=', active_id)]</field>
+        <field name="context">{'search_default_lead_id': active_id, 'default_lead_id': active_id}</field>
+    </record>
+
+    <record id="crm_case_form_view_oppor_inherit" model="ir.ui.view">
+        <field name="name">crm.lead.oppor.inherited.crm</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="sale_crm.crm_case_form_view_oppor"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <h3>
+                    <label for="ref" class="oe_edit_only"/>
+                    <field name="ref"/>
+                </h3>
+            </field>
+            <xpath expr="//button[@name='action_set_won_rainbowman']" position="before">
+                <button string="New Estimation" name="%(action_estimation_new1)d" type="action" class="oe_highlight"
+                        context="{'search_default_partner_id': partner_id,
+                                  'default_partner_id': partner_id,
+                                  'search_default_name': ref, 'default_name': ref,
+                                  }"
+                />
+
+            </xpath>
+            <field name="date_deadline" position="after">
+                <field name="submit_date"/>
+                <field name="lead_source"/>
+                <field name="lead_details"/>
+            </field>
+            <button name="action_schedule_meeting" position="after">
+                <button name="action_view_estimations"
+                        type="object"
+                        class="oe_stat_button"
+                        string="Estimations"
+                        icon="fa-pencil-square-o">
+                </button>
+            </button>
+        </field>
+    </record>
+
+
+    <!--    <record id="crm.crm_case_tree_view_oppor" model="ir.ui.view">-->
+    <!--        <field name="name">crm.lead.tree.opportunity</field>-->
+    <!--        <field name="model">crm.lead</field>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--                <tree string="Opportunities" decoration-bf="message_needaction==True" decoration-muted="probability == 100"-->
+    <!--                      decoration-danger="activity_date_deadline and (activity_date_deadline &lt; current_date)">-->
+    <!--                    <field name="date_deadline" invisible="1"/>-->
+    <!--                    <field name="create_date"/>-->
+    <!--                    <field name="name" string="Opportunity"/>-->
+    <!--                    <field name="partner_id" string="Customer"/>-->
+    <!--                    <field name="country_id"/>-->
+    <!--                    <field name="activity_date_deadline"/>-->
+    <!--                    <field name="activity_summary"/>-->
+    <!--                    <field name="medium_id" invisible="1"/>-->
+    <!--                    <field name="campaign_id" invisible="1"/>-->
+    <!--                    <field name="source_id" invisible="1"/>-->
+    <!--                    <field name="stage_id"/>-->
+    <!--                    <field name="planned_revenue" sum="Expected Revenues"/>-->
+    <!--                    <field name="probability" avg="Avg. of Probability"/>-->
+    <!--                    <field name="team_id"/>-->
+    <!--                    <field name="user_id"/>-->
+    <!--                    <field name="submit_date"/>-->
+    <!--                    <field name="lead_source"/>-->
+    <!--                    <field name="lead_details"/>-->
+    <!--                    <field name="referred" invisible="1"/>-->
+    <!--                    <field name="priority" invisible="1"/>-->
+    <!--                    <field name="message_needaction" invisible="1"/>-->
+    <!--                    <field name="probability" invisible="1"/>-->
+    <!--                    <field name="write_date" invisible="1"/>-->
+    <!--                </tree>-->
+    <!--        </field>-->
+    <!--    </record>-->
+
+
+    <record id="crm_case_tree_view_oppor_inherit_estimation" model="ir.ui.view">
+        <field name="name">crm.lead.tree.opportunity.inherit</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="decoration-bf">message_needaction==True</attribute>
+                <attribute name="decoration-muted">probability == 100</attribute>
+                <attribute name="decoration-danger">activity_date_deadline and (activity_date_deadline &lt;
+                    current_date)
+                </attribute>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="date_deadline" column_invisible="1"/>
+                <field name="create_date"/>
+            </xpath>
+            <xpath expr="//field[@name='contact_name']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='email_from']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='phone']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='state_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='city']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='country_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='create_date']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='expected_revenue']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='probability']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='activity_ids']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='priority']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='team_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='stage_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='source_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='medium_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='campaign_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='lost_reason_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='activity_user_id']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='my_activity_date_deadline']" position="replace">
+            </xpath>
+            <xpath expr="//field[@name='date_deadline' and @optional='hide']" position="replace">
+            </xpath>
+            <xpath expr="//button[@name='%(crm.action_lead_mail_compose)d']" position="replace">
+            </xpath>
+            <xpath expr="//button[@name='action_reschedule_meeting']" position="replace">
+            </xpath>
+            <xpath expr="//button[@name='action_snooze']" position="replace">
+            </xpath>
+            <xpath expr="//tree" position="inside">
+                <field name="partner_id" string="Customer"/>
+                <field name="country_id"/>
+                <field name="activity_date_deadline"/>
+                <field name="activity_summary"/>
+                <field name="stage_id"/>
+                <field name="expected_revenue" sum="Expected Revenues"/>
+                <field name="medium_id" column_invisible="1"/>
+                <field name="campaign_id" column_invisible="1"/>
+                <field name="source_id" column_invisible="1"/>
+                <field name="probability" avg="Avg. of Probability"/>
+                <field name="team_id"/>
+                <field name="user_id"/>
+                <field name="submit_date"/>
+                <field name="lead_source"/>
+                <field name="lead_details"/>
+                <field name="referred" column_invisible="1"/>
+                <field name="priority" column_invisible="1"/>
+                <field name="message_needaction" column_invisible="1"/>
+                <field name="probability" column_invisible="1"/>
+                <field name="write_date" column_invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="crm_case_tree_view_oppor_inherit_estimation_sms" model="ir.ui.view">
+        <field name="name">crm.lead.tree.opportunity.inherit.estimation.sms</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm_sms.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='%(crm_sms.crm_lead_act_window_sms_composer_single)d']" position="replace">
+            </xpath>
+            <xpath expr="//button[@name='%(crm_sms.crm_lead_act_window_sms_composer_multi)d']" position="replace">
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
+ 
